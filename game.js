@@ -1005,7 +1005,7 @@ function enterOffice() {
 }
 function actBadge() {
   G.badged = true; G.done.arrive = true; turnSolid.off = true; turnArm.material = M(0x2cff7a, { emissive: 0x00ff55, emissiveIntensity: .7 }); turnArm.rotation.y = 1.2;
-  const rem = Math.max(0, T_DEADLINE - G.gm), bonus = 250 + Math.floor(rem) * 50; G.arriveStr = fmtShort(G.gm);
+  const rem = Math.max(0, T_DEADLINE - G.gm), bonus = 250 + Math.floor(rem) * 20; G.arriveStr = fmtShort(G.gm);
   addScore(bonus, 'arrive'); popup('BADGED IN ' + G.arriveStr + '  +' + bonus, '#7dff9a'); Snd.ding(); toast('BADGED IN AT ' + G.arriveStr + '. ARRIVAL LOCKED. +' + bonus, 3000);
 }
 
@@ -1337,7 +1337,8 @@ function drawMinimap() {
 /* ============================ MAIN UPDATE ============================ */
 function update(dt) {
   G.t += dt;
-  G.gm += dt * (G.badged ? 1 : 2 / 3);            // 1 real second = 1 in-game minute; the morning commute runs slower (90 real seconds for 7:30 -> 8:30)
+  const rate = G.badged ? 1 : 1 / 3;               // 1 real second = 1 in-game minute; the morning commute runs at 1/3 speed (180 real seconds for 7:30 -> 8:30)
+  G.gm += dt * rate;
   if (G.turbo > 0) G.turbo -= dt;
   // events
   if (!G.flags.alert && G.gm >= T_SCRUM_ALERT) { G.flags.alert = true; if (!G.done.scrum) { Snd.alert(); toast('10:15 AM ALERT: HEAD TO THE CONFERENCE ROOM FOR STANDUP!', 3200); } }
@@ -1345,7 +1346,7 @@ function update(dt) {
   if (!G.flags.conn && G.gm >= T_CONN) { G.flags.conn = true; if (G.done.copilot) toast('1:30 PM: EY CHRISTMAS CONNECTIONS NOW OPEN AT YOUR LAPTOP.', 3000); }
   // hunger (drains from 7:30 until the mandatory lunch is eaten)
   const moving = G.inCar ? false : G.sprinting;
-  if (!G.done.lunch) G.hunger = Math.max(0, G.hunger - .4 * (moving ? 1.6 : 1) * dt);
+  if (!G.done.lunch) G.hunger = Math.max(0, G.hunger - .4 * (moving ? 1.6 : 1) * dt * rate);
   if (!G.done.lunch && G.hunger < 30) { G.growlT -= dt; if (G.growlT <= 0) { G.growlT = 6; Snd.growl(); say('Macros dropping... need ground beef and rice...', 3); } }
   // token cooling
   if (G.tokenLock > 0) { G.tokenLock -= dt; if (G.tokenLock <= 0) { G.tokenLock = 0; G.token = 60; if (G.coolant) { intr.remove(G.coolant.mesh); G.coolant = null; } toast('RATE LIMIT LIFTED. TOKENS RESET TO 60%.', 2400); } }
