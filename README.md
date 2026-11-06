@@ -4,7 +4,9 @@ A lightweight 3D arcade open-world sandbox for mobile Safari (and desktop), insp
 
 It is 7:30 AM in Tallahassee. Matt has to sprint to his Black Camry in a Southwood apartment complex, tear through Cascades Park and downtown, park outside the EY Office at 210 E College Ave by 8:30 AM, then survive a full workday: Copilot approvals, a backup Scrum facilitator gig, mandatory ground beef and rice, and EY Christmas Connections. Clock out with a high score and earn an ice-cold **RPG** (Rum, Pineapple, and Ginger Ale).
 
-**Play it:** `https://colinstephens93.github.io/mattgilmansimulator/` (enable GitHub Pages: Settings > Pages > Deploy from branch > `main` / root)
+**Play it:** https://colinstephens93.github.io/mattgilmansimulator/
+
+Hosted on GitHub Pages (Settings > Pages > Deploy from branch > `main` / root). Every push to `main` republishes the game.
 
 ## Stack
 
