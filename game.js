@@ -393,12 +393,38 @@ function buildExterior() {
   /* ground */
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(1800, 1800), M(0x78c466)); ground.rotation.x = -Math.PI / 2; ground.position.set(250, 0, -280); ext.add(ground);
   const park = new THREE.Mesh(new THREE.PlaneGeometry(PARK.x1 - PARK.x0 + 24, PARK.z1 - PARK.z0 + 24), M(0x66bb55)); park.rotation.x = -Math.PI / 2; park.position.set((PARK.x0 + PARK.x1) / 2, .03, (PARK.z0 + PARK.z1) / 2); ext.add(park);
-  /* roads */
+  /* roads: textured asphalt (edge lines, double-yellow centre), plain intersection patches, curbs */
+  const aniso = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+  const roadTex = center => {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+    g.fillStyle = '#3a3e47'; g.fillRect(0, 0, 256, 128);
+    for (let i = 0; i < 900; i++) { const v = 48 + Math.floor(Math.random() * 30); g.fillStyle = 'rgb(' + v + ',' + (v + 2) + ',' + (v + 8) + ')'; g.fillRect(Math.random() * 256, Math.random() * 128, 1 + Math.random() * 2, 1 + Math.random() * 2); }
+    g.fillStyle = 'rgba(20,22,28,.22)'; g.fillRect(0, 34, 256, 14); g.fillRect(0, 80, 256, 14);          // tyre wear
+    g.fillStyle = '#f1f1ec'; g.fillRect(0, 7, 256, 4); g.fillRect(0, 117, 256, 4);                           // edge lines
+    if (center) { g.fillStyle = '#f2c200'; g.fillRect(0, 59, 256, 3); g.fillRect(0, 66, 256, 3); }          // double yellow
+    else { g.fillStyle = '#e8e8e2'; for (let x = 0; x < 256; x += 64) g.fillRect(x, 62, 36, 3); }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = aniso; return t;
+  };
+  const flat = (geo, tex, x, y, z, ry) => { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex })); m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2; m.rotation.y = ry || 0; m.position.set(x, y, z); ext.add(m); return m; };
+  const plainTex = roadTex(false); plainTex.repeat.set(1, 1);
   ROADS.forEach(r => {
-    const dx = r.b[0] - r.a[0], dz = r.b[1] - r.a[1], len = Math.hypot(dx, dz), ang = -Math.atan2(dz, dx);
-    const m = box(len + r.w, .12, r.w, 0x3b3f48); m.position.set((r.a[0] + r.b[0]) / 2, .06, (r.a[1] + r.b[1]) / 2); m.rotation.y = ang; ext.add(m);
-    if (r.w > 12) { const l = box(len, .02, .35, 0xf2c200); l.position.set((r.a[0] + r.b[0]) / 2, .13, (r.a[1] + r.b[1]) / 2); l.rotation.y = ang; ext.add(l); }
+    let ax = r.a[0], az = r.a[1], bx = r.b[0], bz = r.b[1]; const aisle = r.w <= 12;
+    if (aisle) { const l0 = Math.hypot(bx - ax, bz - az); bx = ax + (bx - ax) / l0 * (l0 - 8); bz = az + (bz - az) / l0 * (l0 - 8); }   // stop at the road edge
+    const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz), ang = -Math.atan2(dz, dx);
+    const tex = roadTex(!aisle); tex.repeat.set(len / 32, 1);
+    flat(new THREE.PlaneGeometry(len, r.w), tex, (ax + bx) / 2, .1, (az + bz) / 2, ang);
+    if (aisle) return;
+    // curbs / sidewalks either side, trimmed where other roads cross
+    const ux = dx / len, uz = dz / len, nx = -uz, nz = ux, trimA = r.a === ROUTE[0] || (r.a[0] === -60) ? 0 : 10.4, trimB = r.b[0] === 190 ? 0 : 10.4;
+    [1, -1].forEach(side => {
+      if (r.b[0] === 190 && side === 1) return;                   // college ave north side has its own sidewalk
+      let spans = [[trimA, len - trimB]];
+      if (r.a[0] === -60 && side === 1) spans = [[trimA, 62], [78, len - trimB]];   // gap for the Southwood lot aisle
+      spans.forEach(([t0, t1]) => { const l = t1 - t0; if (l < 2) return; const off = r.w / 2 + 1.3, tm = (t0 + t1) / 2;
+        const m = box(l, .22, 2.6, 0xb9b6ae); m.position.set(ax + ux * tm + nx * off * side, .11, az + uz * tm + nz * off * side); m.rotation.y = ang; ext.add(m); });
+    });
   });
+  [[200, 0], [200, -280], [440, -280], [440, -560]].forEach(([x, z]) => flat(new THREE.PlaneGeometry(16, 16), plainTex, x, .105, z, 0));
   /* southwood lot */
   const lot = box(LOT.x1 - LOT.x0, .1, LOT.z1 - LOT.z0, 0x555a64); lot.position.set((LOT.x0 + LOT.x1) / 2, .07, (LOT.z0 + LOT.z1) / 2); ext.add(lot);
   for (let x = LOT.x0 + 6; x < LOT.x1; x += 8) { const l = box(.3, .02, 7, 0xeeeeee); l.position.set(x, .14, 34); ext.add(l); }
@@ -1311,7 +1337,7 @@ function drawMinimap() {
 /* ============================ MAIN UPDATE ============================ */
 function update(dt) {
   G.t += dt;
-  G.gm += dt;                                     // 1 real second = 1 in-game minute
+  G.gm += dt * (G.badged ? 1 : 2 / 3);            // 1 real second = 1 in-game minute; the morning commute runs slower (90 real seconds for 7:30 -> 8:30)
   if (G.turbo > 0) G.turbo -= dt;
   // events
   if (!G.flags.alert && G.gm >= T_SCRUM_ALERT) { G.flags.alert = true; if (!G.done.scrum) { Snd.alert(); toast('10:15 AM ALERT: HEAD TO THE CONFERENCE ROOM FOR STANDUP!', 3200); } }

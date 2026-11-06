@@ -27,7 +27,7 @@ While driving, the stick's horizontal axis steers; pulling down while nearly sto
 
 ## Workday timeline
 
-1 real second = 1 in-game minute.
+1 real second = 1 in-game minute, except the morning commute (7:30 - 8:30 AM) which runs at two-thirds speed, so you get 90 real seconds to reach the office.
 
 | Time | Event |
 |---|---|
