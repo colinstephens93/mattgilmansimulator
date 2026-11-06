@@ -535,7 +535,7 @@ function buildCones() {
 /* ---- collectibles ---- */
 const COLL = {
   tupper: { color: 0xffc400, pts: 250, label: 'GOLDEN TUPPERWARE +250', mini: '#ffc400' },
-  cooler: { color: 0xa24bff, pts: 300, label: 'TOKEN COOLER +300', mini: '#c07bff' },
+  cooler: { color: 0xa24bff, pts: 300, label: 'COPILOT CREDITS +300', mini: '#c07bff' },
   brew: { color: 0xb87333, pts: 150, label: 'COLD BREW +150  TURBO!', mini: '#e0a060' },
   badge: { color: 0xffd23a, pts: 500, label: 'GOLDEN EY BADGE +500', mini: '#fff27a' }
 };

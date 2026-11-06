@@ -55,7 +55,7 @@ When nothing is available until the next event, a **Fast-Forward** button appear
 
 ### Scoring and ranks
 
-Objectives, arrival time, cones launched, Capitol drifts, collectibles (Golden Tupperware, Token Coolers, Cold Brew, Golden EY Badges) and time remaining all count.
+Objectives, arrival time, cones launched, Capitol drifts, collectibles (Golden Tupperware, Copilot Credits, Cold Brew, Golden EY Badges) and time remaining all count.
 
 | Rank | Score | Result |
 |---|---|---|
