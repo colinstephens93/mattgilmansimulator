@@ -71,7 +71,7 @@
 <div id="m-copilot" class="modal hidden">
   <div class="titlebar"><span class="traffic"><i></i><i></i><i></i></span><span class="ttl">GitHub Copilot &middot; PR Review</span><button id="cp-close" class="xbtn">STEP AWAY</button></div>
   <div class="mbody">
-    <div class="prog">APPROVED <b id="cp-count">0</b>/20<div class="bar"><i id="cp-fill"></i></div></div>
+    <div class="prog">APPROVED <b id="cp-count">0</b><span>/10</span><div class="bar"><i id="cp-fill"></i></div></div>
     <div id="cp-stage"><div id="cp-card" class="card hidden"><div id="cp-title" class="card-title"></div><pre id="cp-diff" class="diff"></pre><div class="card-timer"><i id="cp-timer"></i></div></div></div>
     <div class="actions"><button id="cp-reject" class="gbtn red wide">REJECT &#10005;</button><button id="cp-approve" class="gbtn green wide">APPROVE &#10003;</button></div>
   </div>
@@ -108,6 +108,8 @@
     <button id="lu-btn" class="gbtn green wide">GRAB MEAL PREP</button>
   </div>
 </div>
+
+<div id="m-call" class="hidden"><div id="call-body"></div><div id="call-btns"></div></div>
 
 <div id="fade"></div>
 <canvas id="confetti" class="hidden"></canvas>

@@ -24,6 +24,7 @@ const fmtShort = gm => fmtClock(gm).replace(/^0/, '');
 const pad4 = n => String(Math.max(0, Math.floor(n))).padStart(4, '0');
 
 /* ----- game clock constants (minutes since midnight) ----- */
+const QUOTA = 10;         // Copilot approvals required
 const T_START = 450;      // 7:30 AM
 const T_LATE = 511;       // 8:31 AM - hard deadline
 const T_DEADLINE = 510;   // 8:30 AM
@@ -654,7 +655,7 @@ const G = {
   foot: { x: -2, z: 24, h: Math.PI / 2, vx: 0, vz: 0, moving: 0 },
   done: { arrive: false, scrum: false, copilot: false, lunch: false, conn: false },
   badged: false, arriveStr: '', modal: null, transition: false, ctx: null, pose: 'idle',
-  copilotCount: 0, lunchStage: 0, scrumActive: false, sitX: 0, ffUsed: 0, flags: {}, coolant: null, growlT: 0, speechT: 0, zone: 1, drifting: false
+  copilotCount: 0, callAt: 560 + Math.random() * 340, date: null, dateScore: 0, lunchStage: 0, scrumActive: false, sitX: 0, ffUsed: 0, flags: {}, coolant: null, growlT: 0, speechT: 0, zone: 1, drifting: false
 };
 let camShake = 0, camSnap = true;
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
@@ -942,7 +943,7 @@ function objective() {
   if (G.tokenLock > 0 && G.coolant) return { x: G.coolant.x, z: G.coolant.z, txt: 'SPRINT TO AMY JONES\' CREDIT REQUEST!' };
   if (scrumOpen()) return { ring: 'scrum', txt: '10:15 ALERT: LEAD THE 10:30 SCRUM IN THE CONFERENCE ROOM' };
   if (lunchOpen() && G.hunger < 45) return { ring: lunchRing(), txt: 'EAT THE MANDATORY BEEF & RICE' };
-  if (!G.done.copilot) return { ring: 'desk', txt: 'APPROVE COPILOT PROMPTS (' + G.copilotCount + '/20)' };
+  if (!G.done.copilot) return { ring: 'desk', txt: 'APPROVE COPILOT PROMPTS (' + G.copilotCount + '/' + QUOTA + ')' };
   if (lunchOpen()) return { ring: lunchRing(), txt: 'EAT THE MANDATORY BEEF & RICE' };
   if (connOpen()) return { ring: 'desk', txt: 'FINISH EY CHRISTMAS CONNECTIONS' };
   if (!G.done.scrum && G.gm < T_SCRUM_ALERT) return { txt: 'SCRUM ALERT AT 10:15 AM - FAST-FORWARD OR COLLECT BADGES' };
@@ -1036,7 +1037,7 @@ function openModal(name) {
   if (G.modal) return; G.modal = name; document.body.classList.add('modal-open'); $(MODALS[name]).classList.remove('hidden');
   if (name === 'copilot' || name === 'conn') { G.sitting = true; G.foot.x = 0; G.foot.z = -7.1; G.foot.h = Math.PI; G.foot.vx = G.foot.vz = 0; G.pose = 'sit'; }
   if (name === 'scrum') { G.foot.x = 23; G.foot.z = -7.6; G.foot.h = Math.PI; G.foot.vx = G.foot.vz = 0; G.pose = 'idle'; G.scrumActive = true; scrumStart(); }
-  if (name === 'copilot') { cp.card = null; cp.gap = .2; $('cp-count').textContent = G.copilotCount; $('cp-fill').style.width = G.copilotCount / 20 * 100 + '%'; }
+  if (name === 'copilot') { cp.card = null; cp.gap = .2; $('cp-count').textContent = G.copilotCount; $('cp-fill').style.width = G.copilotCount / QUOTA * 100 + '%'; }
   if (name === 'conn') connRender();
   if (name === 'lunch') lunchOpenUI();
 }
@@ -1046,6 +1047,7 @@ function closeModal() {
 }
 
 /* ---- Copilot approval spree ---- */
+$('cp-count').nextSibling.textContent = '/' + QUOTA;
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const VALID = [
   ['Refactor microservice auth', '- const user = req.headers.user;\n+ const user = await verifyJwt(req);'],
@@ -1075,11 +1077,11 @@ function cpAnswer(approve) {
   if (G.tokenLock > 0 || !cp.card || G.modal !== 'copilot') return; const c = cp.card; G.lastTap = G.t; Snd.click();
   if (approve) {
     if (c.trap) { addToken(35); popup('HALLUCINATION MERGED! +35% TOKENS', '#ff5a5a'); Snd.bad(); }
-    else { addToken(8); G.copilotCount++; addScore(20); Snd.good(); }
-  } else if (c.trap) { G.copilotCount++; addScore(20); popup('NICE CATCH!', '#7dff9a'); Snd.good(); }
+    else { addToken(8); G.copilotCount++; addScore(40); Snd.good(); }
+  } else if (c.trap) { G.copilotCount++; addScore(40); popup('NICE CATCH!', '#7dff9a'); Snd.good(); }
   else { popup('Perfectly good PR rejected...', '#ffb3b3'); Snd.bad(); }
-  cp.card = null; cp.gap = .22; $('cp-card').classList.add('hidden'); $('cp-count').textContent = G.copilotCount; $('cp-fill').style.width = G.copilotCount / 20 * 100 + '%';
-  if (G.copilotCount >= 20) { G.done.copilot = true; addScore(500, 'obj'); popup('COPILOT QUOTA COMPLETE +500', '#7dff9a'); Snd.fanfare && Snd.good(); closeModal(); toast('COPILOT APPROVAL QUOTA COMPLETE!', 2600); }
+  cp.card = null; cp.gap = .22; $('cp-card').classList.add('hidden'); $('cp-count').textContent = G.copilotCount; $('cp-fill').style.width = G.copilotCount / QUOTA * 100 + '%';
+  if (G.copilotCount >= QUOTA) { G.done.copilot = true; addScore(500, 'obj'); popup('COPILOT QUOTA COMPLETE +500', '#7dff9a'); Snd.fanfare && Snd.good(); closeModal(); toast('COPILOT APPROVAL QUOTA COMPLETE!', 2600); }
 }
 function cpUpdate(dt) {
   if (G.modal !== 'copilot' || G.tokenLock > 0) return;
@@ -1182,6 +1184,33 @@ function connPick(o, b) {
 }
 $('cn-close').addEventListener('pointerdown', e => { e.preventDefault(); closeModal(); });
 
+
+/* ---- Random event: a call from Ashlyn at RailHouse Tavern ---- */
+let ringTimer = null;
+function callUI(html, buttons) {
+  const box_ = $('m-call'); box_.classList.remove('hidden');
+  $('call-body').innerHTML = html; const bx = $('call-btns'); bx.innerHTML = '';
+  buttons.forEach(b => { const el = document.createElement('button'); el.className = 'gbtn wide ' + b.cls; el.textContent = b.t; el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); b.fn(); }); bx.appendChild(el); });
+}
+function startCall() {
+  const ring = () => { Snd.tone(1320, .12, 'square', .1); Snd.tone(990, .12, 'square', .1, 0, .16); Snd.tone(1320, .12, 'square', .1, 0, .5); Snd.tone(990, .12, 'square', .1, 0, .66); };
+  ring(); ringTimer = setInterval(ring, 1800);
+  callUI('<div class="phone">&#9742;</div><h3>INCOMING CALL</h3><p class="who">Ashlyn</p><p class="sub">RailHouse Tavern</p>', [{ t: 'ANSWER', cls: 'green', fn: callAnswer }]);
+  $('m-call').classList.add('ringing');
+}
+function callAnswer() {
+  clearInterval(ringTimer); ringTimer = null; $('m-call').classList.remove('ringing'); Snd.click();
+  callUI('<p class="who">Ashlyn &middot; RailHouse Tavern</p><div class="bubble"><p>"Hey Matt, it\'s Ashlyn from RailHouse Tavern! I was wondering... would you want to go out on a date with me?"</p></div>',
+    [{ t: 'DECLINE', cls: 'red', fn: () => callChoice(false) }, { t: 'ACCEPT', cls: 'green', fn: () => callChoice(true) }]);
+}
+function callChoice(yes) {
+  G.date = yes ? 'yes' : 'no'; G.dateScore = yes ? 300 : 150; addScore(G.dateScore, 'other'); Snd.good();
+  callUI(yes ? '<p class="who">Matt</p><div class="bubble"><p>"Absolutely. I\'d love to."</p></div><p class="sub">Ashlyn: "Great, it\'s a date!"</p>'
+             : '<p class="who">Matt</p><div class="bubble"><p>"Thanks so much for asking, but I\'m going to have to pass. Take care!"</p></div><p class="sub">Ashlyn: "No worries, you too!"</p>', []);
+  popup(yes ? 'DATE WITH ASHLYN: ACCEPTED +300' : 'POLITELY DECLINED +150', yes ? '#ff9ad5' : '#ffe600');
+  setTimeout(() => $('m-call').classList.add('hidden'), 3000);
+}
+
 /* ============================ FAST FORWARD ============================ */
 function ffTarget() {
   if (G.mode !== 'play' || G.loc !== 'int' || !G.badged || G.modal || G.tokenLock > 0) return null;
@@ -1203,7 +1232,8 @@ function win() {
 function finish(kind, reason, sub) {
   G.mode = 'end'; closeModal(); Snd.engine(false); Snd.screech(false); document.body.classList.remove('modal-open');
   $('hud').classList.add('hidden'); $('controls').classList.add('hidden'); $('speech').classList.add('hidden'); $('toast').classList.add('hidden');
-  const rows = [['Core objectives', G.bd.obj], ['Arrival bonus (' + (G.arriveStr || 'never') + ')', G.bd.arrive], ['Time remaining / fast-forward', G.bd.time], ['Collectibles (' + G.counts.collect + ')', G.bd.collect], ['Traffic cones (' + G.counts.cones + ')', G.bd.cones], ['Capitol drifts (' + G.counts.drifts + ')', G.bd.drift], ['Copilot reviews & connections', G.bd.other]];
+  const rows = [['Core objectives', G.bd.obj], ['Arrival bonus (' + (G.arriveStr || 'never') + ')', G.bd.arrive], ['Time remaining / fast-forward', G.bd.time], ['Collectibles (' + G.counts.collect + ')', G.bd.collect], ['Traffic cones (' + G.counts.cones + ')', G.bd.cones], ['Capitol drifts (' + G.counts.drifts + ')', G.bd.drift], ['Copilot reviews & connections', G.bd.other - G.dateScore]];
+  if (G.date) rows.push(['Ashlyn (RailHouse Tavern): ' + (G.date === 'yes' ? 'date accepted' : 'politely declined'), G.dateScore]);
   const table = '<table class="sum">' + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '<tr class="tot"><td>TOTAL</td><td>' + G.score + '</td></tr></table>';
   const retry = '<button id="retry-btn" class="gbtn green wide">ONE-TAP RETRY</button>';
   let h = '';
@@ -1343,6 +1373,7 @@ function update(dt) {
   if (!G.flags.alert && G.gm >= T_SCRUM_ALERT) { G.flags.alert = true; if (!G.done.scrum) { Snd.alert(); toast('10:15 AM ALERT: HEAD TO THE CONFERENCE ROOM FOR STANDUP!', 3200); } }
   if (!G.flags.lunch && G.gm >= T_LUNCH) { G.flags.lunch = true; if (G.badged) toast('11:00 AM: LUNCH WINDOW OPEN. BEEF AND RICE TIME.', 3000); }
   if (!G.flags.conn && G.gm >= T_CONN) { G.flags.conn = true; if (G.done.copilot) toast('1:30 PM: EY CHRISTMAS CONNECTIONS NOW OPEN AT YOUR LAPTOP.', 3000); }
+  if (!G.flags.call && G.badged && G.gm >= G.callAt && !G.modal && !G.transition) { G.flags.call = true; startCall(); }
   // hunger (drains from 7:30 until the mandatory lunch is eaten)
   const moving = G.inCar ? false : G.sprinting;
   if (!G.done.lunch) G.hunger = Math.max(0, G.hunger - .4 * (moving ? 1.6 : 1) * dt * rate);

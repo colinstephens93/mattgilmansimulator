@@ -227,3 +227,14 @@ h1 span{color:var(--ey)}
   #meters{width:96px}
   #scorebox{font-size:10px}
 }
+
+/* ---------- Phone call event ---------- */
+#m-call{position:fixed;z-index:35;left:50%;top:46%;transform:translate(-50%,-50%);width:min(360px,calc(100vw - 24px));background:#0e1626f7;border:3px solid #7dff9a;border-radius:18px;padding:12px 14px;text-align:center;box-shadow:0 8px 30px #000b}
+#m-call.ringing{animation:shake .5s infinite}
+#m-call h3{margin:2px 0;font-size:14px;color:#7dff9a;letter-spacing:1px}
+#m-call .phone{font-size:34px;line-height:1}
+#m-call .who{margin:3px 0;font-size:16px}
+#m-call .sub{margin:4px 0 0;font-size:11px;color:#cfe0ff;font-family:Arial,sans-serif;font-weight:700}
+#m-call .bubble{margin:6px 0}
+#call-btns{display:flex;gap:10px;justify-content:center;margin-top:8px}
+#call-btns .gbtn{flex:1;max-width:150px;font-size:15px;padding:12px 8px}

@@ -29,6 +29,10 @@ While driving, the stick's horizontal axis steers; pulling down while nearly sto
 
 There are no fail states: nothing in the game busts Matt or ends the run early. Missing a window only costs bonus points, and the game ends when all five objectives are done.
 
+## Random event
+
+Sometime between roughly 9:20 AM and 3:10 PM (once Matt has badged in) Ashlyn from RailHouse Tavern calls and asks him out. He can accept (+300) or politely decline (+150). Either answer is fine, and it never affects whether you can finish the day.
+
 ## Workday timeline
 
 1 real second = 1 in-game minute, except the morning commute (7:30 - 8:30 AM) which runs at one-third speed (hunger drains slower too), so you get about 3 real minutes to reach the office.
@@ -37,7 +41,7 @@ There are no fail states: nothing in the game busts Matt or ends the run early. 
 |---|---|
 | 7:30 AM | Start in Southwood |
 | 8:30 AM | Target arrival: park in the yellow zone, walk in, badge in at the turnstile (arriving later just forfeits the arrival bonus) |
-| 8:30 - 1:30 PM | Approve 20 Copilot completions (approve the good diffs, reject the hallucinated ones) |
+| 8:30 - 1:30 PM | Approve 10 Copilot completions (approve the good diffs, reject the hallucinated ones) |
 | 10:15 - 11:00 AM | Backup Scrum Facilitator standup (3 rounds, 4 seconds each) |
 | 11:00 AM - 1:30 PM | Microwave and eat the mandatory ground beef and rice |
 | 1:30 - 5:00 PM | EY Christmas Connections |
