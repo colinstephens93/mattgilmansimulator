@@ -27,6 +27,8 @@ Pure static client-side app. No build step, no backend.
 
 While driving, the stick's horizontal axis steers; pulling down while nearly stopped reverses.
 
+There are no fail states: nothing in the game busts Matt or ends the run early. Missing a window only costs bonus points, and the game ends when all five objectives are done.
+
 ## Workday timeline
 
 1 real second = 1 in-game minute, except the morning commute (7:30 - 8:30 AM) which runs at one-third speed (hunger drains slower too), so you get about 3 real minutes to reach the office.
@@ -34,7 +36,7 @@ While driving, the stick's horizontal axis steers; pulling down while nearly sto
 | Time | Event |
 |---|---|
 | 7:30 AM | Start in Southwood |
-| 8:30 AM | Hard deadline: park in the yellow zone, walk in, badge in at the turnstile |
+| 8:30 AM | Target arrival: park in the yellow zone, walk in, badge in at the turnstile (arriving later just forfeits the arrival bonus) |
 | 8:30 - 1:30 PM | Approve 20 Copilot completions (approve the good diffs, reject the hallucinated ones) |
 | 10:15 - 11:00 AM | Backup Scrum Facilitator standup (3 rounds, 4 seconds each) |
 | 11:00 AM - 1:30 PM | Microwave and eat the mandatory ground beef and rice |
@@ -44,8 +46,8 @@ When nothing is available until the next event, a **Fast-Forward** button appear
 
 ### Meters
 
-- **Copilot Tokens:** +8% per approved diff, +35% for approving a hallucinated one, cools at 4% per second when you pause. At 100% the laptop locks for 12 seconds unless you grab the floating Token Coolant. Three rate-limit lockouts is a Game Over.
-- **Hunger:** drains 0.4% per second (faster while sprinting) until lunch is eaten. Under 30% you slow down and your stomach growls. At 0% Matt passes out. Eating lunch grants the golden "Clean Bulk" speed buff.
+- **Copilot Tokens:** +8% per approved diff, +35% for approving a hallucinated one, cools at 4% per second when you pause. At 100% the laptop locks for 12 seconds, unless you sprint to the floating **Credit Request from Amy Jones**, which replenishes your tokens and awards credits (bonus points). The lock lifts on its own either way.
+- **Hunger:** drains 0.4% per second (faster while sprinting) until lunch is eaten. Under 30% you slow down and your stomach growls. At 0% Matt stays slowed until he eats. Eating lunch grants the golden "Clean Bulk" speed buff.
 
 ### Scoring and ranks
 
@@ -56,7 +58,6 @@ Objectives, arrival time, cones launched, Capitol drifts, collectibles (Golden T
 | S | 5,000+ | THE RPG unlocked, confetti and fanfare |
 | A | 3,000 - 4,999 | Promoted, but no RPG |
 | Clocked Out | under 3,000 | All five objectives done, no promotion |
-| BUSTED | Any objective missed | Stamp with the exact reason and a one-tap retry |
 
 ## Running locally
 

@@ -919,7 +919,7 @@ function updateCollectibles(dt) {
   if (G.coolant) {
     const k = G.coolant; k.mesh.rotation.y += dt * 3; k.mesh.position.y = 2.6 + Math.sin(G.t * 5) * .5;
     if (G.loc === 'int' && dist(k.x, k.z, G.foot.x, G.foot.z) < 3.4) {
-      intr.remove(k.mesh); G.coolant = null; G.tokenLock = 0; G.token = 40; popup('TOKEN COOLANT!  RATE LIMIT CLEARED', '#c07bff'); Snd.coin(); toast('COOLANT GRABBED. LAPTOP UNLOCKED.');
+      intr.remove(k.mesh); G.coolant = null; G.tokenLock = 0; G.token = 40; popup('CREDIT REQUEST APPROVED  +150 CREDITS', '#c07bff'); Snd.coin(); toast('CREDIT REQUEST FROM AMY JONES APPROVED. TOKENS AND CREDITS REPLENISHED.', 3000);
       addScore(150, 'collect');
     }
   }
@@ -928,7 +928,7 @@ function updateCollectibles(dt) {
 /* ========================= OBJECTIVES / RULES ========================= */
 const carInZone = () => Math.abs(G.car.x - ZONE.x) < ZONE.w / 2 + 1.5 && Math.abs(G.car.z - ZONE.z) < ZONE.d / 2 + 1.5;
 const lunchRing = () => ['fridge', 'micro', 'table'][G.lunchStage] || 'table';
-const scrumOpen = () => !G.done.scrum && G.gm >= T_SCRUM_ALERT && G.gm < T_SCRUM_END;
+const scrumOpen = () => !G.done.scrum && G.gm >= T_SCRUM_ALERT;
 const lunchOpen = () => !G.done.lunch && G.gm >= T_LUNCH;
 const connOpen = () => !G.done.conn && G.done.copilot && G.gm >= T_CONN;
 
@@ -939,7 +939,7 @@ function objective() {
     return { x: G.car.x, z: G.car.z, txt: G.t < 3 || dist(G.foot.x, G.foot.z, G.car.x, G.car.z) > 8 ? 'GET TO YOUR BLACK CAMRY' : 'GET IN THE CAMRY' };
   }
   if (!G.badged) return { ring: 'turnstile', txt: 'BADGE IN AT THE SECURITY TURNSTILE' };
-  if (G.tokenLock > 0 && G.coolant) return { x: G.coolant.x, z: G.coolant.z, txt: 'SPRINT TO THE TOKEN COOLANT!' };
+  if (G.tokenLock > 0 && G.coolant) return { x: G.coolant.x, z: G.coolant.z, txt: 'SPRINT TO AMY JONES\' CREDIT REQUEST!' };
   if (scrumOpen()) return { ring: 'scrum', txt: '10:15 ALERT: LEAD THE 10:30 SCRUM IN THE CONFERENCE ROOM' };
   if (lunchOpen() && G.hunger < 45) return { ring: lunchRing(), txt: 'EAT THE MANDATORY BEEF & RICE' };
   if (!G.done.copilot) return { ring: 'desk', txt: 'APPROVE COPILOT PROMPTS (' + G.copilotCount + '/20)' };
@@ -1015,15 +1015,14 @@ function addToken(d) {
 }
 function overheat() {
   G.meltdowns++; Snd.zap();
-  if (G.meltdowns >= 3) { bust('Token Rate Limit Meltdown', 'Copilot rate-limited Matt three times. The laptop is now a very expensive paperweight.'); return; }
   G.tokenLock = 12; G.token = 100; spawnCoolant();
-  toast('TOKEN RATE LIMIT EXCEEDED! GRAB THE COOLANT (' + G.meltdowns + '/3)', 3000);
+  toast('TOKEN RATE LIMIT EXCEEDED! FIND AMY JONES\' CREDIT REQUEST!', 3000);
 }
 function spawnCoolant() {
   if (G.coolant) intr.remove(G.coolant.mesh);
   const spots = [[-22, -14], [-6, 14], [27, -1], [27, 19], [-20, 4], [8, 15], [14, -2]].filter(p => dist(p[0], p[1], 0, -6) > 12);
   const p = spots[Math.floor(Math.random() * spots.length)], g = new THREE.Group();
-  g.add(cyl(1.2, .9, 2.2, 10, M(0xa24bff, { emissive: 0xa24bff, emissiveIntensity: .7 }))); g.add(at(cyl(1.25, 1.25, .3, 10, 0xffffff), 0, 1.3, 0));
+  g.add(box(2.6, 1.7, .3, M(0xffffff, { emissive: 0xa24bff, emissiveIntensity: .35 }))); g.add(at(box(2.6, .12, .34, 0xa24bff), 0, .4, 0)); g.add(at(box(.9, .5, .36, M(0xffe600)), 0, -.2, 0));
   const halo = new THREE.Mesh(new THREE.RingGeometry(1.8, 2.2, 20), new THREE.MeshBasicMaterial({ color: 0xc07bff, side: THREE.DoubleSide })); halo.rotation.x = Math.PI / 2; g.add(halo);
   g.position.set(p[0], 2.6, p[1]); intr.add(g); G.coolant = { mesh: g, x: p[0], z: p[1] };
   if (G.modal) closeModal();
@@ -1032,7 +1031,7 @@ function spawnCoolant() {
 /* ============================ MODALS ============================ */
 const MODALS = { copilot: 'm-copilot', scrum: 'm-scrum', conn: 'm-conn', lunch: 'm-lunch' };
 const OCTO = '<svg viewBox="0 0 64 64"><g fill="#ff5a5a"><circle cx="32" cy="30" r="17"/><path d="M18 18 L16 4 L28 14Z M46 18 L48 4 L36 14Z"/><path d="M20 44 Q12 56 8 52 M28 47 Q26 60 20 58 M36 47 Q38 60 44 58 M44 44 Q52 56 56 52" stroke="#ff5a5a" stroke-width="5" fill="none" stroke-linecap="round"/></g><circle cx="25" cy="30" r="4" fill="#fff"/><circle cx="39" cy="30" r="4" fill="#fff"/><circle cx="25" cy="31" r="2" fill="#000"/><circle cx="39" cy="31" r="2" fill="#000"/></svg>';
-['cp-lock', 'cn-lock'].forEach(id => { $(id).innerHTML = OCTO + '<h3>TOKEN RATE LIMIT EXCEEDED</h3><div class="count">12</div><p>Laptop locked. Close it and sprint to the floating Token Coolant!</p>'; });
+['cp-lock', 'cn-lock'].forEach(id => { $(id).innerHTML = OCTO + '<h3>TOKEN RATE LIMIT EXCEEDED</h3><div class="count">12</div><p>Laptop locked. Close it and sprint to the floating Credit Request from Amy Jones to replenish your tokens and credits!</p>'; });
 function openModal(name) {
   if (G.modal) return; G.modal = name; document.body.classList.add('modal-open'); $(MODALS[name]).classList.remove('hidden');
   if (name === 'copilot' || name === 'conn') { G.sitting = true; G.foot.x = 0; G.foot.z = -7.1; G.foot.h = Math.PI; G.foot.vx = G.foot.vz = 0; G.pose = 'sit'; }
@@ -1377,12 +1376,7 @@ function update(dt) {
 
   // fail / win checks
   if (!G.transition) {
-    if (!G.badged && G.gm >= T_LATE) { bust('Late to Office', 'Still not badged in at ' + fmtShort(G.gm) + '. The mandatory 8:30 AM arrival was missed.'); return; }
-    if (!G.done.scrum && !G.scrumActive && G.gm >= T_SCRUM_END) { bust('Missed 10:30 AM Scrum', 'Nobody facilitated standup. The backup facilitator was on the golf cart.'); return; }
-    if (!G.done.copilot && G.gm >= T_CONN) { bust('Missed the Copilot Approval Quota', 'Only ' + G.copilotCount + '/20 completions approved by 1:30 PM.'); return; }
-    if (!G.done.lunch && G.hunger <= 0) { bust('Passed Out from Zero Beef & Rice', 'Matt collapsed in the office hallway. Busted: Forgot Mandatory Ground Beef & Rice.'); return; }
-    if (!G.done.lunch && G.gm >= T_CONN) { bust('Missed the Mandatory Ground Beef & Rice Lunch', 'The macros were never consumed.'); return; }
-    if (!G.done.conn && G.gm >= T_END) { bust('EY Christmas Connections Unfinished', 'It is 5:00 PM and the holiday grid is still unsolved.'); return; }
+    if (!G.badged && !G.flags.late && G.gm >= T_LATE) { G.flags.late = true; toast('8:30 AM PASSED. NO ARRIVAL BONUS, BUT KEEP GOING!', 3200); }
     if (G.done.arrive && G.done.scrum && G.done.copilot && G.done.lunch && G.done.conn) win();
   }
 }
@@ -1447,7 +1441,7 @@ buildExterior(); buildCones(); buildCollectibles(); buildTraffic(); buildInterio
 camry.position.set(G.car.x, 0, G.car.z); camry.rotation.y = G.car.h; camry.userData.driver.visible = false;
 matt.position.set(G.foot.x, 0, G.foot.z); matt.rotation.y = G.foot.h;
 resize(); camSnap = true;
-window.MGS = { G, input, RINGS, ROUTE, camry, matt, collectibles, actors, cones, openModal, closeModal, enterOffice, actBadge, bust, win, startGame, ffTarget };   // debug hook
+window.MGS = { G, input, RINGS, ROUTE, camry, matt, collectibles, actors, cones, openModal, closeModal, enterOffice, actBadge, addToken, bust, win, startGame, ffTarget };   // debug hook
 requestAnimationFrame(frame);
 try { if (sessionStorage.getItem('mgs-retry') === '1') { sessionStorage.removeItem('mgs-retry'); startGame(); } } catch (_) {}
 })();
