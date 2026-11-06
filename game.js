@@ -546,6 +546,10 @@ function makeCollectible(type, x, z, loc) {
   else if (type === 'cooler') { g.add(cyl(.8, .6, 1.5, 10, M(cfg.color, em))); g.add(at(cyl(.85, .85, .25, 10, M(0xffffff)), 0, .85, 0)); g.add(at(cyl(.08, .08, 1.0, 5, M(0xffffff)), .2, 1.4, 0)); }
   else if (type === 'brew') { g.add(cyl(.8, .6, 1.5, 10, M(0xf2f2f2))); g.add(at(cyl(.82, .62, .8, 10, M(cfg.color, em)), 0, -.3, 0)); g.add(at(cyl(.85, .85, .2, 10, M(0x222222)), 0, .85, 0)); }
   else { const c = cyl(1.0, 1.0, .25, 10, M(cfg.color, em)); c.rotation.x = Math.PI / 2; g.add(c); g.add(at(box(.9, .5, .3, M(0x111111)), 0, 0, .2)); }
+  if (type === 'cooler') {      // floating name tag so the pickup is identifiable in the road
+    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map: textTex(256, 64, (c, w, h) => { c.fillStyle = '#4a1d8f'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b8ff'; c.lineWidth = 5; c.strokeRect(3, 3, w - 6, h - 6); c.fillStyle = '#fff'; c.font = '900 30px Arial Black, Arial'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('COPILOT CREDITS', w / 2, h / 2 + 2); }), transparent: true, depthWrite: false }));
+    tag.scale.set(6, 1.5, 1); tag.position.y = 2.4; g.add(tag);
+  }
   const baseY = loc === 'int' ? 2.2 : 2.6; g.position.set(x, baseY, z); (loc === 'int' ? intr : ext).add(g);
   const o = { type, x, z, loc, g, baseY, taken: false }; collectibles.push(o); return o;
 }
